@@ -15,13 +15,24 @@
       text-align: center;
       color: #333;
     }
-    select, input[type="text"] {
-      width: 100%;
-      padding: 10px;
+    .button-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
       margin-bottom: 20px;
+    }
+    .button-container button {
+      padding: 10px 20px;
+      margin: 5px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      font-size: 16px;
+      background-color: #0074D9;
+      color: white;
+      cursor: pointer;
+    }
+    .button-container button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
     table {
       width: 100%;
@@ -40,20 +51,28 @@
     tr:hover {
       background-color: #f1f1f1;
     }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <h1>Consulta de Centros de Custo</h1>
-  
-  <!-- Dropdown de Agrupamento -->
-  <select id="agrupamentoSelect">
-    <option value="">Selecione o Agrupamento</option>
-  </select>
 
-  <!-- Dropdown de Área -->
-  <select id="areaSelect" disabled>
-    <option value="">Selecione a Área</option>
-  </select>
+  <!-- Botões de Agrupamento -->
+  <div id="agrupamentoButtons" class="button-container">
+    <!-- Os botões serão gerados aqui dinamicamente -->
+  </div>
+
+  <!-- Botões de Área -->
+  <div id="areaButtons" class="button-container" style="display:none;">
+    <!-- Os botões serão gerados aqui dinamicamente -->
+  </div>
 
   <!-- Filtro de Pesquisa -->
   <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." disabled />
@@ -106,46 +125,44 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const dados = await fetchDados();
+
+      // Criar os botões de Agrupamento
       const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
-      const agrupamentoSelect = document.getElementById("agrupamentoSelect");
+      const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
       agrupamentos.forEach(agrupamento => {
-        const option = document.createElement("option");
-        option.value = agrupamento;
-        option.textContent = agrupamento;
-        agrupamentoSelect.appendChild(option);
-      });
+        const button = document.createElement("button");
+        button.textContent = agrupamento;
+        button.addEventListener("click", () => {
+          const selectedAgrupamento = agrupamento;
+          // Gerar botões de Área com base no agrupamento selecionado
+          const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === selectedAgrupamento).map(item => item.area)));
+          
+          const areaButtonsContainer = document.getElementById("areaButtons");
+          areaButtonsContainer.innerHTML = ''; // Limpar áreas anteriores
+          areas.forEach(area => {
+            const areaButton = document.createElement("button");
+            areaButton.textContent = area;
+            areaButton.addEventListener("click", () => {
+              // Filtra dados por agrupamento e área
+              const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, area);
+              renderTabela(filtrados);
+              document.getElementById("searchInput").disabled = false; // Habilitar a busca
+            });
+            areaButtonsContainer.appendChild(areaButton);
+          });
 
-      agrupamentoSelect.addEventListener("change", () => {
-        const agrupamento = agrupamentoSelect.value;
-        const areaSelect = document.getElementById("areaSelect");
-        const filteredAreas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === agrupamento).map(item => item.area)));
-        
-        areaSelect.innerHTML = '<option value="">Selecione a Área</option>'; // Limpa as áreas anteriores
-        filteredAreas.forEach(area => {
-          const option = document.createElement("option");
-          option.value = area;
-          option.textContent = area;
-          areaSelect.appendChild(option);
+          areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
+          document.getElementById("searchInput").disabled = false; // Habilitar a pesquisa
         });
-
-        areaSelect.disabled = false; // Habilita o seletor de área
-        document.getElementById("searchInput").disabled = false; // Habilita a busca
+        agrupamentoButtonsContainer.appendChild(button);
       });
 
       // Filtro de pesquisa
       document.getElementById("searchInput").addEventListener("input", e => {
         const termo = e.target.value;
-        const agrupamento = document.getElementById("agrupamentoSelect").value;
-        const area = document.getElementById("areaSelect").value;
+        const agrupamento = document.querySelector("#agrupamentoButtons .active")?.textContent || '';
+        const area = document.querySelector("#areaButtons .active")?.textContent || '';
         const filtrados = filtrar(filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area), termo);
-        renderTabela(filtrados);
-      });
-
-      // Filtro de área
-      document.getElementById("areaSelect").addEventListener("change", () => {
-        const agrupamento = document.getElementById("agrupamentoSelect").value;
-        const area = document.getElementById("areaSelect").value;
-        const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area);
         renderTabela(filtrados);
       });
     });
