@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centros de Custo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #0074D9;
+      color: white;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Consulta de Centros de Custo</h1>
+  <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." />
+  <table id="centroCustoTable">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Descrição</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchDados() {
+      try {
+        const response = await fetch("https://indicadores.grupojapungu.com/centro-custo");
+        const data = await response.json();
+        return data.result;
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        return [];
+      }
+    }
+
+    function renderTabela(dados) {
+      const tbody = document.querySelector("#centroCustoTable tbody");
+      tbody.innerHTML = "";
+      dados.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${item.codigo_centro_custo}</td><td>${item.descricao_centro_custo}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function filtrar(dados, termo) {
+      return dados.filter(item => {
+        return item.codigo_centro_custo.toString().includes(termo) ||
+               item.descricao_centro_custo.toLowerCase().includes(termo.toLowerCase());
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const dados = await fetchDados();
+      renderTabela(dados);
+
+      document.getElementById("searchInput").addEventListener("input", e => {
+        const termo = e.target.value;
+        const filtrados = filtrar(dados, termo);
+        renderTabela(filtrados);
+      });
+    });
+  </script>
+</body>
+</html>
