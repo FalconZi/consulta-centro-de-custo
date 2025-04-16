@@ -141,7 +141,14 @@
       const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
       const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
 
-      agrupamentos.forEach(agrupamento => {
+      // Agrupamentos que queremos exibir (com base nos dados da API)
+      const agrupamentosFiltrados = agrupamentos.filter(agrupamento => 
+        agrupamento === "ADMINISTRAÇÃO" || 
+        agrupamento === "OFICINA/MANUTENÇÃO" || 
+        agrupamento === "APOIO/OPERAÇÕES AGRÍCOLAS" || 
+        agrupamento === "ADM INDÚSTRIA");
+
+      agrupamentosFiltrados.forEach(agrupamento => {
         const button = document.createElement("button");
         button.textContent = agrupamento;
         button.addEventListener("click", () => {
