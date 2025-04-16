@@ -15,24 +15,31 @@
       text-align: center;
       color: #333;
     }
+    .section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
     .button-container {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 20px;
+      gap: 10px;
     }
     .button-container button {
       padding: 10px 20px;
-      margin: 5px;
       border: 1px solid #ccc;
       border-radius: 4px;
       background-color: #0074D9;
       color: white;
       cursor: pointer;
     }
-    .button-container button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+    .button-container button.active {
+      background-color: #005bb5;
+      font-weight: bold;
     }
     table {
       width: 100%;
@@ -64,20 +71,22 @@
 <body>
   <h1>Consulta de Centros de Custo</h1>
 
-  <!-- Botões de Agrupamento -->
-  <div id="agrupamentoButtons" class="button-container">
-    <!-- Os botões serão gerados aqui dinamicamente -->
+  <!-- Agrupamentos -->
+  <div class="section">
+    <div class="section-title">Agrupamentos</div>
+    <div id="agrupamentoButtons" class="button-container"></div>
   </div>
 
-  <!-- Botões de Área -->
-  <div id="areaButtons" class="button-container" style="display:none;">
-    <!-- Os botões serão gerados aqui dinamicamente -->
+  <!-- Áreas -->
+  <div class="section">
+    <div class="section-title">Áreas</div>
+    <div id="areaButtons" class="button-container"></div>
   </div>
 
-  <!-- Filtro de Pesquisa -->
+  <!-- Campo de pesquisa -->
   <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." disabled />
 
-  <!-- Tabela de Centros de Custo -->
+  <!-- Tabela de resultados -->
   <table id="centroCustoTable">
     <thead>
       <tr>
@@ -89,6 +98,10 @@
   </table>
 
   <script>
+    let dadosGlobais = [];
+    let agrupamentoSelecionado = null;
+    let areaSelecionada = null;
+
     async function fetchDados() {
       try {
         const response = await fetch("https://indicadores.grupojapungu.com/centro-custo");
@@ -111,59 +124,105 @@
     }
 
     function filtrar(dados, termo) {
-      return dados.filter(item => {
-        return item.id_centro_custo.toString().includes(termo) ||
-               item.descricao_centro_custo.toLowerCase().includes(termo.toLowerCase());
-      });
+      return dados.filter(item =>
+        item.id_centro_custo.toString().includes(termo) ||
+        item.descricao_centro_custo.toLowerCase().includes(termo.toLowerCase())
+      );
     }
 
-    function filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area) {
-      return dados.filter(item => {
-        return item.agrupamento_da_area === agrupamento && item.area === area;
+    function filtrarCentrosDeCusto() {
+      if (!agrupamentoSelecionado || !areaSelecionada) {
+        renderTabela([]);
+        document.getElementById("searchInput").disabled = true;
+        return;
+      }
+
+      const filtrados = dadosGlobais.filter(item =>
+        item.agrupamento_da_area === agrupamentoSelecionado &&
+        item.area === areaSelecionada
+      );
+
+      renderTabela(filtrados);
+      document.getElementById("searchInput").disabled = false;
+    }
+
+    function atualizarBotoesAtivos(container, valorSelecionado, setFunc) {
+      const botoes = container.querySelectorAll("button");
+      botoes.forEach(btn => {
+        if (btn.dataset.valor === valorSelecionado) {
+          btn.classList.toggle("active");
+          if (!btn.classList.contains("active")) {
+            setFunc(null);
+          } else {
+            setFunc(valorSelecionado);
+            botoes.forEach(b => {
+              if (b !== btn) b.classList.remove("active");
+            });
+          }
+        }
       });
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      const dados = await fetchDados();
+      dadosGlobais = await fetchDados();
 
-      // Criar os botões de Agrupamento
-      const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
-      const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
-      agrupamentos.forEach(agrupamento => {
-        const button = document.createElement("button");
-        button.textContent = agrupamento;
-        button.addEventListener("click", () => {
-          const selectedAgrupamento = agrupamento;
-          // Gerar botões de Área com base no agrupamento selecionado
-          const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === selectedAgrupamento).map(item => item.area)));
-          
-          const areaButtonsContainer = document.getElementById("areaButtons");
-          areaButtonsContainer.innerHTML = ''; // Limpar áreas anteriores
-          areas.forEach(area => {
-            const areaButton = document.createElement("button");
-            areaButton.textContent = area;
-            areaButton.addEventListener("click", () => {
-              // Filtra dados por agrupamento e área
-              const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, area);
-              renderTabela(filtrados);
-              document.getElementById("searchInput").disabled = false; // Habilitar a busca
-            });
-            areaButtonsContainer.appendChild(areaButton);
+      const ordemAgrupamentos = [
+        "ADMINISTRAÇÃO",
+        "OFICINA/MANUTENÇÃO",
+        "APOIO/OPERAÇÕES AGRÍCOLAS",
+        "ADM INDÚSTRIA/ ADM INDÚSTRIA E OUTROS"
+      ];
+
+      const unicosAgrupamentos = ordemAgrupamentos.filter(agrup => 
+        dadosGlobais.some(item => item.agrupamento_da_area === agrup)
+      );
+
+      const agrupamentoContainer = document.getElementById("agrupamentoButtons");
+      const areaContainer = document.getElementById("areaButtons");
+
+      // Criar botões de agrupamento
+      unicosAgrupamentos.forEach(agrupamento => {
+        const btn = document.createElement("button");
+        btn.textContent = agrupamento;
+        btn.dataset.valor = agrupamento;
+        btn.addEventListener("click", () => {
+          atualizarBotoesAtivos(agrupamentoContainer, agrupamento, valor => {
+            agrupamentoSelecionado = valor;
+            areaSelecionada = null;
+            areaContainer.innerHTML = "";
+            if (valor) {
+              const areas = [...new Set(dadosGlobais
+                .filter(item => item.agrupamento_da_area === valor)
+                .map(item => item.area))];
+
+              areas.forEach(area => {
+                const btnArea = document.createElement("button");
+                btnArea.textContent = area;
+                btnArea.dataset.valor = area;
+                btnArea.addEventListener("click", () => {
+                  atualizarBotoesAtivos(areaContainer, area, val => {
+                    areaSelecionada = val;
+                    filtrarCentrosDeCusto();
+                  });
+                });
+                areaContainer.appendChild(btnArea);
+              });
+            } else {
+              renderTabela([]);
+              document.getElementById("searchInput").disabled = true;
+            }
           });
-
-          areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
-          document.getElementById("searchInput").disabled = false; // Habilitar a pesquisa
         });
-        agrupamentoButtonsContainer.appendChild(button);
+        agrupamentoContainer.appendChild(btn);
       });
 
-      // Filtro de pesquisa
       document.getElementById("searchInput").addEventListener("input", e => {
         const termo = e.target.value;
-        const agrupamento = document.querySelector("#agrupamentoButtons .active")?.textContent || '';
-        const area = document.querySelector("#areaButtons .active")?.textContent || '';
-        const filtrados = filtrar(filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area), termo);
-        renderTabela(filtrados);
+        const filtrados = dadosGlobais.filter(item =>
+          item.agrupamento_da_area === agrupamentoSelecionado &&
+          item.area === areaSelecionada
+        );
+        renderTabela(filtrar(filtrados, termo));
       });
     });
   </script>
