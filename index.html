@@ -141,14 +141,16 @@
       const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
       const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
 
-      // Ordem dos agrupamentos conforme solicitado
+      // Ordem dos agrupamentos conforme solicitado, com "OUTROS" no final
       const agrupamentosOrdenados = [
         "ADMINISTRAÇÃO", 
         "OFICINA/MANUTENÇÃO", 
-        "APOIO/OPERAÇÕES AGRÍCOLAS"
+        "APOIO/OPERAÇÕES AGRÍCOLAS", 
+        "ADM INDÚSTRIA", 
+        "ADM INDÚSTRIA E OUTROS"
       ];
 
-      const agrupamentoOutros = ["ADM INDÚSTRIA", "ADM INDÚSTRIA E OUTROS"];
+      const agrupamentoOutros = ["OUTROS"];
 
       // Garantir que todos os agrupamentos, incluindo os não mencionados, sejam exibidos
       const agrupamentosUnicos = agrupamentosOrdenados.concat(
@@ -204,7 +206,7 @@
         agrupamentoButtonsContainer.appendChild(button);
       });
 
-      // Adicionar os botões para o agrupamento "ADM INDÚSTRIA" e "ADM INDÚSTRIA E OUTROS"
+      // Adicionar os botões para o agrupamento "OUTROS" separadamente
       agrupamentoOutros.forEach(agrupamento => {
         const button = document.createElement("button");
         button.textContent = agrupamento;
