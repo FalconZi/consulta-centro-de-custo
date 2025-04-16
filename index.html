@@ -137,11 +137,24 @@
     document.addEventListener("DOMContentLoaded", async () => {
       const dados = await fetchDados();
 
-      // Ordem dos agrupamentos conforme solicitado
-      const agrupamentos = ["ADMINISTRAÇÃO", "OFICINA/MANUTENÇÃO", "APOIO/OPERAÇÕES AGRÍCOLAS", "ADM INDÚSTRIA/ ADM INDÚSTRIA E OUTROS"];
+      // Recuperar todos os agrupamentos disponíveis (sem definir a ordem diretamente)
+      const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
       const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
 
-      agrupamentos.forEach(agrupamento => {
+      // Ordenar os agrupamentos conforme solicitado
+      const agrupamentosOrdenados = [
+        "ADMINISTRAÇÃO", 
+        "OFICINA/MANUTENÇÃO", 
+        "APOIO/OPERAÇÕES AGRÍCOLAS", 
+        "ADM INDÚSTRIA/ ADM INDÚSTRIA E OUTROS"
+      ];
+
+      // Garantir que todos os agrupamentos, incluindo os não mencionados, sejam exibidos
+      const agrupamentosUnicos = agrupamentosOrdenados.concat(
+        agrupamentos.filter(agrupamento => !agrupamentosOrdenados.includes(agrupamento))
+      );
+
+      agrupamentosUnicos.forEach(agrupamento => {
         const button = document.createElement("button");
         button.textContent = agrupamento;
         button.addEventListener("click", () => {
