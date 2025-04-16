@@ -137,77 +137,11 @@
     document.addEventListener("DOMContentLoaded", async () => {
       const dados = await fetchDados();
 
-      // Recuperar todos os agrupamentos disponíveis (sem definir a ordem diretamente)
+      // Recuperar todos os agrupamentos disponíveis da API
       const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
       const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
 
-      // Ordem dos agrupamentos conforme solicitado, com "OUTROS" no final
-      const agrupamentosOrdenados = [
-        "ADMINISTRAÇÃO", 
-        "OFICINA/MANUTENÇÃO", 
-        "APOIO/OPERAÇÕES AGRÍCOLAS", 
-        "ADM INDÚSTRIA", 
-        "ADM INDÚSTRIA E OUTROS"
-      ];
-
-      const agrupamentoOutros = ["OUTROS"];
-
-      // Garantir que todos os agrupamentos, incluindo os não mencionados, sejam exibidos
-      const agrupamentosUnicos = agrupamentosOrdenados.concat(
-        agrupamentos.filter(agrupamento => !agrupamentosOrdenados.includes(agrupamento) && !agrupamentoOutros.includes(agrupamento))
-      );
-
-      agrupamentosUnicos.forEach(agrupamento => {
-        const button = document.createElement("button");
-        button.textContent = agrupamento;
-        button.addEventListener("click", () => {
-          // Adicionar ou remover a classe "active" para marcar/desmarcar o botão
-          button.classList.toggle("active");
-
-          // Desmarcar a seleção de área
-          const areaButtonsContainer = document.getElementById("areaButtons");
-          areaButtonsContainer.innerHTML = '';
-          areaButtonsContainer.style.display = 'none'; // Esconder botões de área
-
-          // Limpar e desabilitar a pesquisa
-          document.getElementById("searchInput").value = '';
-          document.getElementById("searchInput").disabled = true;
-
-          if (button.classList.contains("active")) {
-            // Gerar os botões de área para o agrupamento selecionado
-            const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === agrupamento).map(item => item.area)));
-
-            const areaButtonsContainer = document.getElementById("areaButtons");
-            areaButtonsContainer.innerHTML = ''; // Limpar áreas anteriores
-            areas.forEach(area => {
-              const areaButton = document.createElement("button");
-              areaButton.textContent = area;
-              areaButton.addEventListener("click", () => {
-                // Adicionar ou remover a classe "active" para marcar/desmarcar o botão
-                areaButton.classList.toggle("active");
-
-                // Se ambos agrupamento e área estiverem selecionados, exibe a tabela
-                if (document.querySelector("#agrupamentoButtons .active") && document.querySelector("#areaButtons .active")) {
-                  const selectedAgrupamento = agrupamento;
-                  const selectedArea = areaButton.textContent;
-                  const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, selectedArea);
-                  renderTabela(filtrados);
-                  document.getElementById("searchInput").disabled = false; // Habilitar a pesquisa
-                } else {
-                  renderTabela([]); // Limpar tabela se não houver seleção de agrupamento ou área
-                }
-              });
-              areaButtonsContainer.appendChild(areaButton);
-            });
-
-            areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
-          }
-        });
-        agrupamentoButtonsContainer.appendChild(button);
-      });
-
-      // Adicionar os botões para o agrupamento "OUTROS" separadamente
-      agrupamentoOutros.forEach(agrupamento => {
+      agrupamentos.forEach(agrupamento => {
         const button = document.createElement("button");
         button.textContent = agrupamento;
         button.addEventListener("click", () => {
