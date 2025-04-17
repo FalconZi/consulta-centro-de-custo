@@ -86,7 +86,7 @@
   </div>
 
   <!-- Filtro de Pesquisa -->
-  <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." disabled />
+  <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." />
 
   <!-- Tabela de Centros de Custo -->
   <table id="centroCustoTable">
@@ -128,16 +128,16 @@
       });
     }
 
-    function filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area) {
+    function filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, areaSelecionada) {
       return dados.filter(item => {
-        return item.agrupamento_da_area === agrupamento && item.area === area;
+        return item.agrupamento_da_area === agrupamento && item.area === areaSelecionada;
       });
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
       const dados = await fetchDados();
 
-      // Recuperar todos os agrupamentos disponíveis da API
+      // Recuperar todos os agrupamentos e áreas disponíveis da API
       const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
       const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
 
@@ -146,61 +146,56 @@
         const button = document.createElement("button");
         button.textContent = agrupamento;
         button.addEventListener("click", () => {
-          // Adicionar ou remover a classe "active" para marcar/desmarcar o botão
-          button.classList.toggle("active");
+          // Desmarcar os outros agrupamentos
+          document.querySelectorAll("#agrupamentoButtons button").forEach(btn => btn.classList.remove("active"));
+          button.classList.add("active");
 
           // Desmarcar a seleção de área
           const areaButtonsContainer = document.getElementById("areaButtons");
           areaButtonsContainer.innerHTML = '';
           areaButtonsContainer.style.display = 'none'; // Esconder botões de área
 
-          // Limpar e desabilitar a pesquisa
-          document.getElementById("searchInput").value = '';
-          document.getElementById("searchInput").disabled = true;
+          // Limpar a tabela
+          renderTabela([]);
 
-          if (button.classList.contains("active")) {
-            // Gerar os botões de área para o agrupamento selecionado
-            const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === agrupamento).map(item => item.area)));
+          // Gerar os botões de área para o agrupamento selecionado
+          const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === agrupamento).map(item => item.area)));
 
-            const areaButtonsContainer = document.getElementById("areaButtons");
-            areaButtonsContainer.innerHTML = ''; // Limpar áreas anteriores
-            areas.forEach(area => {
-              const areaButton = document.createElement("button");
-              areaButton.textContent = area;
-              areaButton.addEventListener("click", () => {
-                // Adicionar ou remover a classe "active" para marcar/desmarcar o botão
-                areaButton.classList.toggle("active");
+          areas.forEach(area => {
+            const areaButton = document.createElement("button");
+            areaButton.textContent = area;
+            areaButton.classList.add("areaButton");
+            areaButton.addEventListener("click", () => {
+              // Desmarcar a seleção de outras áreas
+              document.querySelectorAll(".areaButton").forEach(btn => btn.classList.remove("active"));
+              areaButton.classList.add("active");
 
-                // Se ambos agrupamento e área estiverem selecionados, exibe a tabela
-                if (document.querySelector("#agrupamentoButtons .active") && document.querySelector("#areaButtons .active")) {
-                  const selectedAgrupamento = agrupamento;
-                  const selectedArea = areaButton.textContent;
-                  const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, selectedArea);
-                  renderTabela(filtrados);
-                  document.getElementById("searchInput").disabled = false; // Habilitar a pesquisa
-                } else {
-                  renderTabela([]); // Limpar tabela se não houver seleção de agrupamento ou área
-                }
-              });
-              areaButtonsContainer.appendChild(areaButton);
+              // Se pelo menos uma área for selecionada, mostra os dados
+              const selectedAgrupamento = agrupamento;
+              const selectedArea = areaButton.textContent;
+              const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, selectedArea);
+              renderTabela(filtrados);
             });
+            areaButtonsContainer.appendChild(areaButton);
+          });
 
-            areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
-          }
+          areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
         });
         agrupamentoButtonsContainer.appendChild(button);
       });
+
+      // Habilitar a pesquisa desde o início
+      document.getElementById("searchInput").disabled = false;
 
       // Filtro de pesquisa
       document.getElementById("searchInput").addEventListener("input", e => {
         const termo = e.target.value;
         const agrupamento = document.querySelector("#agrupamentoButtons .active")?.textContent || '';
-        const area = document.querySelector("#areaButtons .active")?.textContent || '';
-        const filtrados = filtrar(filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, area), termo);
+        const areaSelecionada = document.querySelector(".areaButton.active")?.textContent || '';
+        const filtrados = filtrar(filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, areaSelecionada), termo);
         renderTabela(filtrados);
       });
     });
   </script>
 </body>
 </html>
-
