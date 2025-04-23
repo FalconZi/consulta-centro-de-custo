@@ -233,6 +233,25 @@
     const errorMessageElement = document.getElementById("errorMessage");
     const tbody = document.querySelector("#centroCustoTable tbody");
 
+    // Função para normalizar texto removendo acentos
+    function normalizarTexto(texto) {
+      if (!texto) return '';
+      
+      // Normaliza o texto para a forma de decomposição canônica (NFD)
+      // e remove todos os caracteres diacríticos (acentos, cedilhas, etc.)
+      return texto.normalize('NFD')
+                 .replace(/[\u0300-\u036f]/g, '') // Remove diacríticos
+                 .toLowerCase();
+    }
+
+    // Função para verificar se um texto contém outro, ignorando acentos
+    function contemTextoSemAcento(textoOriginal, termoBusca) {
+      const textoNormalizado = normalizarTexto(textoOriginal);
+      const termoNormalizado = normalizarTexto(termoBusca);
+      
+      return textoNormalizado.includes(termoNormalizado);
+    }
+
     // Função para buscar dados da API
     async function fetchDados() {
       try {
@@ -284,10 +303,10 @@
       
       // Se tiver termo de pesquisa
       if (termoPesquisa) {
-        // Filtrar por termo de pesquisa primeiro
+        // Filtrar por termo de pesquisa primeiro, com tratamento de acentuação
         const resultadosPesquisa = dadosCompletos.filter(item => {
           return item.id_centro_custo.toString().includes(termoPesquisa) ||
-                 item.descricao_centro_custo.toLowerCase().includes(termoPesquisa.toLowerCase());
+                 contemTextoSemAcento(item.descricao_centro_custo, termoPesquisa);
         });
         
         // Se não tiver agrupamento selecionado, retorna apenas os resultados da pesquisa
