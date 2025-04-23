@@ -5,101 +5,235 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Centros de Custo</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
+    :root {
+      --navy-dark: #0a1929;
+      --navy-medium: #102a43;
+      --navy-light: #1e3a5f;
+      --orange-dark: #b35900;
+      --orange-medium: #e67300;
+      --orange-light: #ff9933;
+      --white: #ffffff;
+      --light-gray: #f5f7fa;
+      --medium-gray: #e4e7eb;
+      --dark-gray: #616e7c;
+      --error-color: #d32f2f;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light-gray);
+      color: var(--navy-dark);
+      line-height: 1.6;
       padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    .button-container {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
+
+    .container {
+      background-color: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      padding: 24px;
       margin-bottom: 20px;
     }
-    .button-container button {
-      padding: 10px 20px;
-      margin: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: #0074D9;
-      color: white;
-      cursor: pointer;
+
+    h1 {
+      text-align: center;
+      color: var(--navy-dark);
+      margin-bottom: 24px;
+      font-weight: 600;
+      font-size: 28px;
     }
-    .button-container button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+
+    .search-container {
+      margin-bottom: 24px;
     }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--medium-gray);
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      background-color: var(--white);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--orange-dark);
+      box-shadow: 0 0 0 3px rgba(179, 89, 0, 0.2);
+    }
+
     .section-title {
       width: 100%;
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
+      text-align: left;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: var(--navy-dark);
+      font-size: 18px;
+      border-bottom: 2px solid var(--medium-gray);
+      padding-bottom: 8px;
     }
-    .button-container button.active {
-      background-color: #0056b3;
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
     }
+
+    .filter-button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: var(--navy-medium);
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .filter-button:hover {
+      background-color: var(--navy-light);
+    }
+
+    .filter-button.active {
+      background-color: var(--orange-dark);
+    }
+
+    .filter-button:disabled {
+      background-color: var(--dark-gray);
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: white;
+      background-color: var(--white);
+      border-radius: 6px;
+      overflow: hidden;
     }
+
     th, td {
       text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--medium-gray);
     }
+
     th {
-      background-color: #0074D9;
-      color: white;
+      background-color: var(--navy-dark);
+      color: var(--white);
+      font-weight: 500;
     }
+
     tr:hover {
-      background-color: #f1f1f1;
+      background-color: var(--light-gray);
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 16px;
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .error-message {
+      background-color: rgba(211, 47, 47, 0.1);
+      color: var(--error-color);
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 24px;
+      color: var(--dark-gray);
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      
+      .container {
+        padding: 16px;
+      }
+      
+      th, td {
+        padding: 10px 12px;
+      }
+      
+      .filter-button {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Consulta de Centros de Custo</h1>
+  <div class="container">
+    <h1>Consulta de Centros de Custo</h1>
 
-  <!-- Agrupamentos Section -->
-  <div class="section-title">Agrupamentos</div>
-  <div id="agrupamentoButtons" class="button-container">
-    <!-- Os botões de agrupamento serão gerados aqui -->
+    <!-- Filtro de Pesquisa -->
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por código ou descrição..." />
+    </div>
+
+    <!-- Mensagem de erro -->
+    <div id="errorMessage" class="error-message"></div>
+
+    <!-- Agrupamentos Section -->
+    <div class="section-title">Agrupamentos</div>
+    <div id="agrupamentoButtons" class="button-container">
+      <!-- Os botões de agrupamento serão gerados aqui -->
+    </div>
+
+    <!-- Área Section -->
+    <div class="section-title">Área</div>
+    <div id="areaButtons" class="button-container">
+      <!-- Os botões de área serão gerados aqui -->
+    </div>
+
+    <!-- Tabela de Centros de Custo -->
+    <table id="centroCustoTable">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="2" class="no-results">Selecione um agrupamento e uma área ou pesquise por um centro de custo</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
-
-  <!-- Área Section -->
-  <div class="section-title">Área</div>
-  <div id="areaButtons" class="button-container" style="display:none;">
-    <!-- Os botões de área serão gerados aqui -->
-  </div>
-
-  <!-- Filtro de Pesquisa -->
-  <input type="text" id="searchInput" placeholder="Pesquisar por código ou descrição..." />
-
-  <!-- Tabela de Centros de Custo -->
-  <table id="centroCustoTable">
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Descrição</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 
   <script>
+    // Variáveis globais
+    let dadosCompletos = [];
+    let agrupamentoSelecionado = '';
+    let areaSelecionada = '';
+    let termoPesquisa = '';
+
+    // Elementos DOM
+    const searchInput = document.getElementById("searchInput");
+    const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
+    const areaButtonsContainer = document.getElementById("areaButtons");
+    const errorMessageElement = document.getElementById("errorMessage");
+    const tbody = document.querySelector("#centroCustoTable tbody");
+
+    // Função para buscar dados da API
     async function fetchDados() {
       try {
         const response = await fetch("https://indicadores.grupojapungu.com/centro-custo");
@@ -107,93 +241,215 @@
         return data.result;
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
+        mostrarErro("Não foi possível carregar os dados. Por favor, tente novamente mais tarde.");
         return [];
       }
     }
 
+    // Função para mostrar mensagem de erro
+    function mostrarErro(mensagem) {
+      errorMessageElement.textContent = mensagem;
+      errorMessageElement.style.display = "block";
+    }
+
+    // Função para esconder mensagem de erro
+    function esconderErro() {
+      errorMessageElement.style.display = "none";
+    }
+
+    // Função para renderizar a tabela
     function renderTabela(dados) {
-      const tbody = document.querySelector("#centroCustoTable tbody");
       tbody.innerHTML = "";
+      
+      if (dados.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="2" class="no-results">Nenhum resultado encontrado</td>`;
+        tbody.appendChild(row);
+        return;
+      }
+      
       dados.forEach(item => {
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${item.id_centro_custo}</td><td>${item.descricao_centro_custo}</td>`;
+        row.innerHTML = `
+          <td>${item.id_centro_custo}</td>
+          <td>${item.descricao_centro_custo}</td>
+        `;
         tbody.appendChild(row);
       });
     }
 
-    function filtrar(dados, termo) {
-      return dados.filter(item => {
-        return item.id_centro_custo.toString().includes(termo) ||
-               item.descricao_centro_custo.toLowerCase().includes(termo.toLowerCase());
+    // Função para filtrar dados com base nos critérios selecionados
+    function filtrarDados() {
+      esconderErro();
+      
+      // Se tiver termo de pesquisa
+      if (termoPesquisa) {
+        // Filtrar por termo de pesquisa primeiro
+        const resultadosPesquisa = dadosCompletos.filter(item => {
+          return item.id_centro_custo.toString().includes(termoPesquisa) ||
+                 item.descricao_centro_custo.toLowerCase().includes(termoPesquisa.toLowerCase());
+        });
+        
+        // Se não tiver agrupamento selecionado, retorna apenas os resultados da pesquisa
+        if (!agrupamentoSelecionado) {
+          return resultadosPesquisa;
+        }
+        
+        // Verificar se os resultados da pesquisa pertencem ao agrupamento selecionado
+        const resultadosAgrupamento = resultadosPesquisa.filter(item => 
+          item.agrupamento_da_area === agrupamentoSelecionado
+        );
+        
+        // Se não houver resultados compatíveis com o agrupamento
+        if (resultadosAgrupamento.length === 0 && agrupamentoSelecionado) {
+          mostrarErro(`O termo pesquisado não corresponde ao agrupamento "${agrupamentoSelecionado}".`);
+          return [];
+        }
+        
+        // Se tiver área selecionada
+        if (areaSelecionada) {
+          const resultadosArea = resultadosAgrupamento.filter(item => 
+            item.area === areaSelecionada
+          );
+          
+          // Se não houver resultados compatíveis com a área
+          if (resultadosArea.length === 0) {
+            mostrarErro(`O termo pesquisado não corresponde à área "${areaSelecionada}" do agrupamento "${agrupamentoSelecionado}".`);
+            return [];
+          }
+          
+          return resultadosArea;
+        }
+        
+        return resultadosAgrupamento;
+      } 
+      // Se não tiver termo de pesquisa, mas tiver agrupamento e área
+      else if (agrupamentoSelecionado && areaSelecionada) {
+        return dadosCompletos.filter(item => 
+          item.agrupamento_da_area === agrupamentoSelecionado && 
+          item.area === areaSelecionada
+        );
+      } 
+      // Se tiver apenas agrupamento
+      else if (agrupamentoSelecionado) {
+        return dadosCompletos.filter(item => 
+          item.agrupamento_da_area === agrupamentoSelecionado
+        );
+      }
+      
+      // Se não tiver nenhum filtro, retorna todos os dados
+      return [];
+    }
+
+    // Função para atualizar a interface com base nos filtros
+    function atualizarInterface() {
+      const dadosFiltrados = filtrarDados();
+      renderTabela(dadosFiltrados);
+    }
+
+    // Função para selecionar agrupamento
+    function selecionarAgrupamento(agrupamento) {
+      // Desmarcar os outros agrupamentos
+      document.querySelectorAll("#agrupamentoButtons .filter-button").forEach(btn => 
+        btn.classList.remove("active")
+      );
+      
+      // Se clicar no mesmo agrupamento, desseleciona
+      if (agrupamentoSelecionado === agrupamento) {
+        agrupamentoSelecionado = '';
+        areaButtonsContainer.innerHTML = '';
+        atualizarInterface();
+        return;
+      }
+      
+      // Marcar o agrupamento selecionado
+      agrupamentoSelecionado = agrupamento;
+      document.querySelector(`#agrupamentoButtons .filter-button[data-value="${agrupamento}"]`).classList.add("active");
+      
+      // Limpar seleção de área
+      areaSelecionada = '';
+      
+      // Gerar botões de área para o agrupamento selecionado
+      atualizarBotoesArea();
+      
+      // Atualizar a tabela
+      atualizarInterface();
+    }
+
+    // Função para selecionar área
+    function selecionarArea(area) {
+      // Desmarcar as outras áreas
+      document.querySelectorAll("#areaButtons .filter-button").forEach(btn => 
+        btn.classList.remove("active")
+      );
+      
+      // Se clicar na mesma área, desseleciona
+      if (areaSelecionada === area) {
+        areaSelecionada = '';
+        atualizarInterface();
+        return;
+      }
+      
+      // Marcar a área selecionada
+      areaSelecionada = area;
+      document.querySelector(`#areaButtons .filter-button[data-value="${area}"]`).classList.add("active");
+      
+      // Atualizar a tabela
+      atualizarInterface();
+    }
+
+    // Função para atualizar os botões de área com base no agrupamento selecionado
+    function atualizarBotoesArea() {
+      areaButtonsContainer.innerHTML = '';
+      
+      if (!agrupamentoSelecionado) return;
+      
+      // Obter áreas do agrupamento selecionado
+      const areas = Array.from(
+        new Set(
+          dadosCompletos
+            .filter(item => item.agrupamento_da_area === agrupamentoSelecionado)
+            .map(item => item.area)
+        )
+      ).sort();
+      
+      // Criar botões para cada área
+      areas.forEach(area => {
+        const areaButton = document.createElement("button");
+        areaButton.textContent = area;
+        areaButton.classList.add("filter-button");
+        areaButton.dataset.value = area;
+        areaButton.addEventListener("click", () => selecionarArea(area));
+        areaButtonsContainer.appendChild(areaButton);
       });
     }
 
-    function filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, areaSelecionada) {
-      return dados.filter(item => {
-        return item.agrupamento_da_area === agrupamento && item.area === areaSelecionada;
-      });
-    }
-
+    // Inicialização
     document.addEventListener("DOMContentLoaded", async () => {
-      const dados = await fetchDados();
-
-      // Recuperar todos os agrupamentos e áreas disponíveis da API
-      const agrupamentos = Array.from(new Set(dados.map(item => item.agrupamento_da_area)));
-      const agrupamentoButtonsContainer = document.getElementById("agrupamentoButtons");
-
+      // Buscar dados da API
+      dadosCompletos = await fetchDados();
+      
+      if (dadosCompletos.length === 0) return;
+      
+      // Obter todos os agrupamentos disponíveis
+      const agrupamentos = Array.from(
+        new Set(dadosCompletos.map(item => item.agrupamento_da_area))
+      ).sort();
+      
       // Gerar botões de agrupamento
       agrupamentos.forEach(agrupamento => {
         const button = document.createElement("button");
         button.textContent = agrupamento;
-        button.addEventListener("click", () => {
-          // Desmarcar os outros agrupamentos
-          document.querySelectorAll("#agrupamentoButtons button").forEach(btn => btn.classList.remove("active"));
-          button.classList.add("active");
-
-          // Desmarcar a seleção de área
-          const areaButtonsContainer = document.getElementById("areaButtons");
-          areaButtonsContainer.innerHTML = '';
-          areaButtonsContainer.style.display = 'none'; // Esconder botões de área
-
-          // Limpar a tabela
-          renderTabela([]);
-
-          // Gerar os botões de área para o agrupamento selecionado
-          const areas = Array.from(new Set(dados.filter(item => item.agrupamento_da_area === agrupamento).map(item => item.area)));
-
-          areas.forEach(area => {
-            const areaButton = document.createElement("button");
-            areaButton.textContent = area;
-            areaButton.classList.add("areaButton");
-            areaButton.addEventListener("click", () => {
-              // Desmarcar a seleção de outras áreas
-              document.querySelectorAll(".areaButton").forEach(btn => btn.classList.remove("active"));
-              areaButton.classList.add("active");
-
-              // Se pelo menos uma área for selecionada, mostra os dados
-              const selectedAgrupamento = agrupamento;
-              const selectedArea = areaButton.textContent;
-              const filtrados = filtrarPorAgrupamentoEAgrupamento(dados, selectedAgrupamento, selectedArea);
-              renderTabela(filtrados);
-            });
-            areaButtonsContainer.appendChild(areaButton);
-          });
-
-          areaButtonsContainer.style.display = 'flex'; // Mostrar botões de área
-        });
+        button.classList.add("filter-button");
+        button.dataset.value = agrupamento;
+        button.addEventListener("click", () => selecionarAgrupamento(agrupamento));
         agrupamentoButtonsContainer.appendChild(button);
       });
-
-      // Habilitar a pesquisa desde o início
-      document.getElementById("searchInput").disabled = false;
-
-      // Filtro de pesquisa
-      document.getElementById("searchInput").addEventListener("input", e => {
-        const termo = e.target.value;
-        const agrupamento = document.querySelector("#agrupamentoButtons .active")?.textContent || '';
-        const areaSelecionada = document.querySelector(".areaButton.active")?.textContent || '';
-        const filtrados = filtrar(filtrarPorAgrupamentoEAgrupamento(dados, agrupamento, areaSelecionada), termo);
-        renderTabela(filtrados);
+      
+      // Configurar evento de pesquisa
+      searchInput.addEventListener("input", e => {
+        termoPesquisa = e.target.value.trim();
+        atualizarInterface();
       });
     });
   </script>
